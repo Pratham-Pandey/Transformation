@@ -1,13 +1,10 @@
 import os.path
-
 import cv2
 import numpy as np
 import cv2.aruco as aruco
 import glob
 import open3d as o3d
 from sklearn.cluster import DBSCAN
-import matplotlib.pyplot as plt
-
 
 class Camera:
     def __init__(self):
@@ -50,11 +47,6 @@ class Camera:
                 tvec_adjusted = tvec + offset_camera_frame
 
                 if success:
-                    # print(rvec.shape)
-                    # print(rvec)
-                    # print(tvec.shape)
-                    # print(tvec.ravel())
-
                     aruco.drawDetectedMarkers(img_cpy1, corners, ids)
                     cv2.imshow("Detected Aruco Markers", img_cpy1)
 
@@ -66,7 +58,9 @@ class Camera:
                     cv2.destroyAllWindows()
 
                     return cv2.Rodrigues(rvec.ravel())[0], tvec.ravel()
-                    #return rvec, tvec
+
+        print("Unable to Estimate Pose! Skipping.")
+        return np.zeros((3, 3)), np.zeros(3)
 
 class Lidar:
     def __init__(self):
@@ -271,7 +265,6 @@ class Transformation:
         return R_lidar_to_camera, t_lidar_to_camera, T_lidar_to_camera
 
 
-
 lidar_data_dir = "/home/pratham/Desktop/documents/Tasks/Ati_motors/pc_save/"
 camera_data_dir = "/home/pratham/Desktop/documents/Tasks/Ati_motors/cv_assignment/"
 
@@ -285,7 +278,10 @@ for i in lidar_data_files:
     if (os.path.exists(lidar_file_path) and os.path.exists(camera_file_path)):
         # Problem 1: Charuco Marker Detection and Pose Estimation using camera data
         camera = Camera()
-        rmat, tvec = camera.marker_detection_pose_estimation("/home/pratham/Desktop/misc/documents/job/Tasks/cv_assignment/cam_27.png")
+        rmat, tvec = camera.marker_detection_pose_estimation(camera_file_path)
+
+        if (rmat[0,0] == 0 and tvec[0] == 0):
+            continue
 
         print("\nProblem 1 Solution: ")
         print("Rotation Matrix: ")
@@ -295,7 +291,7 @@ for i in lidar_data_files:
 
         # Problem 2: Retroreflective Tape Detection using Lidar data
         lidar = Lidar()
-        radius, circle_center, plane_model = lidar.retroreflective_tape_detection("/home/pratham/Desktop/misc/documents/job/Tasks/pc_save/lidar_27.npy")
+        radius, circle_center, plane_model = lidar.retroreflective_tape_detection(lidar_file_path)
 
         print("\n\nProblem 2 Solution: ")
         print("\tCircle Center: ", circle_center)
