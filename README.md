@@ -44,3 +44,7 @@ Go to the project directory
 * The final transformation matrix between the lidar and camera along with other information are printed in the terminal.
 
 * The **output** folder in the repo contains the detected markers.
+
+>  [!IMPORTANT]
+> In every path you set, make sure '/' is added at the end of the path.
+
